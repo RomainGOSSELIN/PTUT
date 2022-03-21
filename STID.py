@@ -1,9 +1,5 @@
-from encodings import utf_8
-from sqlite3 import Row
 import streamlit as st
 import pandas as pd
-import numpy as np
-import webbrowser
 
 # Paramètres de la page
 st.set_page_config(page_title = "STID ET APRES ?", page_icon = "🎓")
