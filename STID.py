@@ -1,7 +1,11 @@
 import streamlit as st
 import pandas as pd
+import pydeck as pdk
+import numpy as np
 import datetime
 import os
+
+
 
 from io import BytesIO
 from openpyxl import load_workbook
@@ -33,11 +37,17 @@ formations = to_excel(df)
 # Bouton de téléchargement de la db
 st.download_button(label = "📊 Télécharger la base de données", data = formations, file_name = 'formations.xlsx')
 
+# Titre - Carte
+st.title("🗺️ Carte", anchor = None)
+
+st.pydeck_chart(pdk.Deck(map_style = 'mapbox://styles/mapbox/light-v9', initial_view_state = pdk.ViewState(latitude = 48.856616, longitude = 2.352224, zoom = 7, pitch = 50,),
+     layers = [pdk.Layer('ScatterplotLayer', data = df, get_position = '[Longitude, Latitude]', get_radius = 2000, get_color ='[200, 30, 0, 160]',),],))
+
 # Titre - Critères
 st.title("✔️ Critères", anchor = None)
 
 # Critères de recherche
-region = st.selectbox("Région 🗺️", df["Région"].unique())
+region = st.selectbox("Région 🧭", df["Région"].unique())
 df_restreint = df.loc[(df["Région"] == (region))]
 departement = st.selectbox("Département 📍", df_restreint["Département"].unique())
 diplome = st.selectbox("Diplôme délivré 🏆", df_restreint["Diplôme délivré"].unique())
@@ -49,11 +59,11 @@ st.title("🔍 Résultats", anchor = None)
 # Sélection des lignes selon le respect des critères
 df_restreint = df.loc[(df["Département"] == (departement)) & (df["Diplôme délivré"] == (diplome)) & (df["Statut"] == (statut))]
 
-if len(df_restreint) != 0 & len(df_restreint) != 1:
+if len(df_restreint) > 1 & len(df_restreint) != 1:
     st.success("🥳 Hourra ! " + str(len(df_restreint)) + " formations correspondent à vos critères de recherche !")
-elif len(df_restreint) == 1:
+if len(df_restreint) == 1:
     st.success("🎉 Ouuuf ! " + str(len(df_restreint)) + " formation correspond à vos critères de recherche !")
-elif len(df_restreint) == 0 :
+if len(df_restreint) == 0 :
     st.error("❌ Sapristi ! Aucune formation ne correspond à vos critères de recherche ! Essayez d'en changer !")
 
 # Affichage du dataframe restreint
@@ -130,4 +140,5 @@ if envoyer:
     df_reponses = pd.DataFrame(reponses, index = [datetime.datetime.now()])
     questionnaire = "questionnaire.xlsx"
     append_df_to_excel(questionnaire, df_reponses, header = False)
+    st.balloons()
     st.success("💯 Vos réponses ont bien été enregistrées ! Merci de votre participation ! 🙏")
